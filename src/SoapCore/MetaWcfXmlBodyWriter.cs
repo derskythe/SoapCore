@@ -8,6 +8,7 @@ using System.ServiceModel.Channels;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using SoapCore.ServiceModel;
 
 namespace SoapCore
 {
@@ -556,25 +557,24 @@ namespace SoapCore
 				else if (typeof(IEnumerable).IsAssignableFrom(type))
 				{
 					var genericType = GetGenericType(type);
+					if (string.IsNullOrEmpty(name))
+					{
+						name = type.Name;
+					}
 
 					if (genericType.Name == "String")
 					{
-						if (string.IsNullOrEmpty(name))
-						{
-							name = type.Name;
-						}
-
 						writer.WriteAttributeString("maxOccurs", "unbounded");
 						writer.WriteAttributeString("name", name);
 						writer.WriteAttributeString("type", "xs:string");
 					}
+					else if (genericType.Name == "Object")
+					{
+						writer.WriteAttributeString("maxOccurs", "unbounded");
+						writer.WriteAttributeString("name", name);
+					}
 					else
 					{
-						if (string.IsNullOrEmpty(name))
-						{
-							name = type.Name;
-						}
-
 						writer.WriteAttributeString("name", name);
 
 						if (!isArray && !isArrayElement)
@@ -595,7 +595,14 @@ namespace SoapCore
 						else
 						{
 							writer.WriteAttributeString("type", "tns:" + genericType.Name);
-							_complexTypeToBuild.Enqueue(genericType);
+							if (genericType.IsEnum)
+							{
+								_enumToBuild.Enqueue(genericType);
+							}
+							else
+							{
+								_complexTypeToBuild.Enqueue(genericType);
+							}
 						}
 					}
 				}

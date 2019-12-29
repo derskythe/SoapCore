@@ -29,6 +29,7 @@ namespace SoapCore
 					switch (_serializer)
 					{
 						case SoapSerializer.XmlSerializer:
+						case SoapSerializer.XmlWcfSerializer:
 							if (!parameterType.IsArray || (parameterInfo != null && parameterInfo.ArrayName != null && parameterInfo.ArrayItemName == null))
 							{
 								// case [XmlElement("parameter")] int parameter
